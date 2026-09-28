@@ -3,7 +3,6 @@ import {
   ArrowRight,
   CalendarDays,
   Check,
-  ChevronDown,
   Clock3,
   HeartHandshake,
   Menu,
@@ -23,6 +22,7 @@ import { z } from "zod";
 import clinicImage from "@/assets/dental-clinic.jpg";
 import consultationImage from "@/assets/dental-consultation.jpg";
 import heroImage from "@/assets/dental-hero.jpg";
+import clinicLogo from "@/assets/clinic-logo.png";
 import { Button } from "@/components/ui/button";
 
 const PHONE_DISPLAY = "+91 93451 50623";
@@ -36,7 +36,6 @@ const navItems = [
   ["Services", "#services"],
   ["Why Choose Us", "#why-us"],
   ["Patient Experience", "#experience"],
-  ["FAQ", "#faq"],
   ["Contact", "#contact"],
 ];
 
@@ -107,9 +106,7 @@ export const Route = createFileRoute("/")({
 function Brand() {
   return (
     <a href="#home" className="flex min-w-0 items-center gap-3" aria-label="Dr. SIVA'S home">
-      <span className="grid size-11 shrink-0 place-items-center rounded-md bg-primary text-primary-foreground">
-        <span className="font-display text-xl font-extrabold">S</span>
-      </span>
+      <img src={clinicLogo} alt="Shiny Smiles — Dr. SIVA'S Multispeciality Dental Clinic logo" width={44} height={44} className="size-11 shrink-0" />
       <span className="min-w-0 leading-none">
         <span className="block truncate font-display text-base font-extrabold text-primary">Dr. SIVA&apos;S</span>
         <span className="mt-1 block truncate text-[9px] font-bold uppercase tracking-[0.16em] text-muted-foreground">
@@ -175,14 +172,6 @@ const appointmentSchema = z.object({
   message: z.string().trim().max(500, "Keep the message under 500 characters"),
 });
 
-const faqs = [
-  ["What are the clinic hours?", "The clinic is open every day, 9:00 AM to 11:00 PM."],
-  ["Do I need an appointment?", "We recommend booking ahead so the clinic can reserve a time for you. Please call to confirm availability."],
-  ["What should I do in a dental emergency?", "Call the clinic directly during opening hours so the team can advise you on the next steps."],
-  ["Is root canal treatment painful?", "Treatment is performed with local anaesthesia and a comfort-focused approach. Your dentist will explain what to expect."],
-  ["Am I suitable for implants or aligners?", "Suitability depends on a clinical assessment. Book a consultation to discuss your options."],
-  ["Where is the clinic located?", "327B, Kamarajar Salai, Ramakrishna Nagar, Alwartirunagar, Valasaravakkam, Chennai 600087."],
-] as const;
 
 function AppointmentForm() {
   const [whatsappUrl, setWhatsappUrl] = useState<string | null>(null);
@@ -231,24 +220,6 @@ function AppointmentForm() {
       <Button type="submit" size="lg" className="sm:col-span-2">Prepare Appointment Request<ArrowRight className="size-4" /></Button>
       <p className="text-center text-xs text-muted-foreground sm:col-span-2">Your details stay on your device until you choose to send them. The clinic will confirm availability.</p>
     </form>
-  );
-}
-
-function FaqSection() {
-  return (
-    <section id="faq" className="bg-muted py-20 sm:py-28">
-      <div className="mx-auto grid max-w-7xl gap-12 px-4 sm:px-6 lg:grid-cols-[0.8fr_1.2fr] lg:px-8">
-        <SectionHeading eyebrow="FAQ" title="Common Patient Questions" body="Quick answers before your visit. For anything specific, please call the clinic." />
-        <div className="grid gap-3">
-          {faqs.map(([q, a]) => (
-            <details key={q} className="group rounded-lg border border-border bg-background p-5 open:border-secondary">
-              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-bold">{q}<ChevronDown className="size-5 shrink-0 text-secondary transition-transform group-open:rotate-180" /></summary>
-              <p className="mt-3 text-sm leading-6 text-muted-foreground">{a}</p>
-            </details>
-          ))}
-        </div>
-      </div>
-    </section>
   );
 }
 
@@ -348,8 +319,6 @@ function Index() {
             <AppointmentForm />
           </div>
         </section>
-
-        <FaqSection />
 
         <section id="contact" className="bg-muted py-20 sm:py-28">
           <div className="mx-auto grid max-w-7xl gap-8 px-4 sm:px-6 lg:grid-cols-2 lg:px-8">
