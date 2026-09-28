@@ -26,6 +26,7 @@ import consultationImage from "@/assets/dental-consultation.jpg";
 import heroImage from "@/assets/dental-hero.jpg";
 import clinicLogo from "@/assets/clinic-logo.png";
 import { Button } from "@/components/ui/button";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { checkAppointmentRequest } from "@/lib/appointment-check";
 
 const PHONE_DISPLAY = "+91 93451 50623";
@@ -121,7 +122,7 @@ function Brand() {
       <img src={clinicLogo} alt="Shiny Smiles — Dr. SIVA'S Multispeciality Dental Clinic logo" width={44} height={44} className="size-11 shrink-0" />
       <span className="min-w-0 leading-none">
         <span className="block truncate font-display text-base font-extrabold text-primary">Dr. SIVA&apos;S</span>
-        <span className="mt-1 block truncate text-[9px] font-bold uppercase tracking-[0.16em] text-muted-foreground">
+        <span className="mt-1 block truncate text-[8px] font-bold uppercase tracking-[0.1em] text-muted-foreground sm:text-[9px] sm:tracking-[0.16em]">
           Multispeciality Dental Clinic
         </span>
       </span>
@@ -267,12 +268,14 @@ function AppointmentForm() {
 
 function ReviewsSection() {
   const [reviewPage, setReviewPage] = useState(0);
-  const reviewsPerPage = 3;
+  const isMobile = useIsMobile();
+  const reviewsPerPage = isMobile ? 1 : 3;
   const pageCount = Math.ceil(googleReviews.length / reviewsPerPage);
-  const visibleReviews = googleReviews.slice(reviewPage * reviewsPerPage, (reviewPage + 1) * reviewsPerPage);
+  const safeReviewPage = Math.min(reviewPage, pageCount - 1);
+  const visibleReviews = googleReviews.slice(safeReviewPage * reviewsPerPage, (safeReviewPage + 1) * reviewsPerPage);
 
   return (
-    <section id="reviews" className="bg-accent py-20 sm:py-28">
+    <section id="reviews" className="scroll-mt-20 bg-accent py-16 sm:scroll-mt-24 sm:py-28">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col items-start justify-between gap-7 md:flex-row md:items-end">
           <div><div className="flex items-center gap-1 text-secondary" aria-label="5 out of 5 stars">{Array.from({ length: 5 }).map((_, index) => <Star key={index} className="size-5 fill-current" />)}</div><h2 className="mt-3 text-3xl font-extrabold sm:text-4xl">5.0 from 77 Google reviews</h2><p className="mt-3 text-muted-foreground">Five featured reviews from the clinic’s 77 verified Google reviews.</p></div>
@@ -280,17 +283,17 @@ function ReviewsSection() {
         </div>
         <div className="mt-10 grid gap-4 lg:grid-cols-3">
           {visibleReviews.map((review) => (
-            <article key={review.author} className="flex min-h-80 flex-col rounded-lg border border-border bg-background p-6 shadow-sm">
+            <article key={review.author} className="flex flex-col rounded-lg border border-border bg-background p-5 shadow-sm sm:p-6 lg:min-h-80">
               <div className="flex items-center justify-between gap-4"><div className="flex gap-1 text-secondary" aria-label="5 stars">{Array.from({ length: 5 }).map((_, index) => <Star key={index} className="size-4 fill-current" />)}</div><span className="text-xs text-muted-foreground">{review.when}</span></div>
               <blockquote className="mt-5 flex-1 text-sm leading-7 text-foreground/80">“{review.text}”</blockquote>
               <div className="mt-6 flex items-center justify-between gap-3 border-t border-border pt-4"><strong>{review.author}</strong><a href={MAP_URL} target="_blank" rel="noopener noreferrer" className="text-sm font-bold text-primary hover:underline">View on Google</a></div>
             </article>
           ))}
         </div>
-        <div className="mt-7 flex items-center justify-center gap-4">
-          <Button type="button" variant="outline" size="icon" onClick={() => setReviewPage((page) => (page - 1 + pageCount) % pageCount)} aria-label="Show previous reviews"><ChevronLeft className="size-5" /></Button>
-          <span className="text-sm font-semibold text-muted-foreground" aria-live="polite">Reviews {reviewPage * reviewsPerPage + 1}–{Math.min((reviewPage + 1) * reviewsPerPage, googleReviews.length)} of {googleReviews.length} featured</span>
-          <Button type="button" variant="outline" size="icon" onClick={() => setReviewPage((page) => (page + 1) % pageCount)} aria-label="Show next reviews"><ChevronRight className="size-5" /></Button>
+        <div className="mt-7 grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 sm:mx-auto sm:max-w-md sm:gap-4">
+          <Button type="button" variant="outline" size="icon" onClick={() => setReviewPage((page) => (Math.min(page, pageCount - 1) - 1 + pageCount) % pageCount)} aria-label="Show previous reviews"><ChevronLeft className="size-5" /></Button>
+          <span className="text-center text-xs font-semibold text-muted-foreground sm:text-sm" aria-live="polite">Reviews {safeReviewPage * reviewsPerPage + 1}–{Math.min((safeReviewPage + 1) * reviewsPerPage, googleReviews.length)} of {googleReviews.length} featured</span>
+          <Button type="button" variant="outline" size="icon" onClick={() => setReviewPage((page) => (Math.min(page, pageCount - 1) + 1) % pageCount)} aria-label="Show next reviews"><ChevronRight className="size-5" /></Button>
         </div>
       </div>
     </section>
@@ -309,11 +312,11 @@ function DesktopQuickActions() {
 
 function Index() {
   return (
-    <div className="min-h-screen bg-background pb-16 text-foreground md:pb-0">
+    <div className="min-h-screen bg-background pb-[calc(4rem+env(safe-area-inset-bottom))] text-foreground md:pb-0">
       <Navbar />
       <main>
-        <section id="home" className="relative min-h-[calc(100svh-5rem)] overflow-hidden bg-muted">
-          <img src={heroImage} alt="Dentist in a bright, modern dental treatment room" width={1600} height={1000} className="absolute inset-0 h-full w-full object-cover object-[68%_center]" />
+        <section id="home" className="relative min-h-[calc(100svh-5rem)] scroll-mt-20 overflow-hidden bg-muted sm:scroll-mt-24">
+          <img src={heroImage} alt="Dentist in a bright, modern dental treatment room" width={1600} height={1000} className="absolute inset-0 h-full w-full object-cover object-[76%_center] sm:object-[72%_center] lg:object-[68%_center]" />
           <div className="absolute inset-0 bg-[linear-gradient(90deg,var(--background)_0%,color-mix(in_oklab,var(--background)_94%,transparent)_39%,color-mix(in_oklab,var(--background)_18%,transparent)_72%)]" />
           <div className="relative mx-auto flex min-h-[calc(100svh-5rem)] max-w-7xl items-center px-4 py-14 sm:px-6 lg:px-8">
             <div className="max-w-2xl animate-rise">
@@ -321,7 +324,7 @@ function Index() {
                 <span className="inline-flex items-center gap-2 rounded-full border border-secondary/40 bg-background/85 px-4 py-2 text-xs font-bold text-primary shadow-sm backdrop-blur"><Navigation className="size-4 text-secondary" /> Valasaravakkam, Chennai</span>
                 <span className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-xs font-bold text-primary-foreground shadow-sm"><Clock3 className="size-4 text-secondary" /> Open all 7 days, including Sundays</span>
               </div>
-              <h1 className="max-w-xl text-4xl font-extrabold leading-[1.08] text-primary sm:text-6xl lg:text-7xl">Your Smile Deserves Expert Care</h1>
+              <h1 className="max-w-xl text-4xl font-extrabold leading-tight text-primary sm:text-6xl sm:leading-[1.08] lg:text-7xl">Your Smile Deserves Expert Care</h1>
               <p className="mt-6 max-w-xl text-base leading-7 text-foreground/75 sm:text-lg">Comprehensive dental care focused on your comfort, confidence and long-term oral health.</p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <Button asChild size="lg"><a href="#appointment"><CalendarDays className="size-5" />Book an Appointment</a></Button>
@@ -336,7 +339,7 @@ function Index() {
           </div>
         </section>
 
-        <section id="about" className="py-20 sm:py-28">
+        <section id="about" className="scroll-mt-20 py-16 sm:scroll-mt-24 sm:py-28">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <SectionHeading eyebrow="Patient-first dentistry" title="Dental Care With a Patient-First Approach" body="Thoughtful, comprehensive care with an emphasis on comfort, hygiene, personalised treatment and modern dental practices." />
             <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -348,7 +351,7 @@ function Index() {
           </div>
         </section>
 
-        <section id="services" className="bg-muted py-20 sm:py-28">
+        <section id="services" className="scroll-mt-20 bg-muted py-16 sm:scroll-mt-24 sm:py-28">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end"><SectionHeading eyebrow="Our services" title="Complete Dental Care Under One Roof" body="From preventive support to restorative and cosmetic care, treatment recommendations follow consultation and clinical assessment." /><Button asChild variant="secondary"><a href="#appointment">Book a Consultation<ArrowRight className="size-4" /></a></Button></div>
             <div className="mt-12 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -363,14 +366,14 @@ function Index() {
           </div>
         </section>
 
-        <section className="py-20 sm:py-28">
+        <section className="py-16 sm:py-28">
           <div className="mx-auto grid max-w-7xl items-center gap-12 px-4 sm:px-6 lg:grid-cols-2 lg:px-8">
-            <div className="relative overflow-hidden rounded-lg"><img src={consultationImage} alt="Dentist discussing a personalised treatment plan with a patient" loading="lazy" width={1200} height={900} className="aspect-[4/3] h-full w-full object-cover" /><div className="absolute bottom-4 left-4 rounded-md bg-background/95 px-4 py-3 text-sm font-semibold shadow-lg backdrop-blur">Clear guidance. Considered care.</div></div>
+            <div className="relative overflow-hidden rounded-lg"><img src={consultationImage} alt="Dentist discussing a personalised treatment plan with a patient" loading="lazy" width={1200} height={900} className="aspect-[4/3] h-full w-full object-cover object-center" /><div className="absolute inset-x-3 bottom-3 rounded-md bg-background/95 px-4 py-3 text-center text-sm font-semibold shadow-lg backdrop-blur sm:inset-x-auto sm:bottom-4 sm:left-4 sm:text-left">Clear guidance. Considered care.</div></div>
             <div><SectionHeading eyebrow="Care made personal" title="Modern Dentistry. Personalised For You." body="Every patient’s dental needs are different. Treatment recommendations are made after consultation and clinical evaluation, with time to understand your concerns and options." /><Button asChild size="lg" className="mt-8"><a href="#appointment">Schedule Your Consultation<ArrowRight className="size-4" /></a></Button></div>
           </div>
         </section>
 
-        <section id="why-us" className="bg-primary py-20 sm:py-28">
+        <section id="why-us" className="scroll-mt-20 bg-primary py-16 sm:scroll-mt-24 sm:py-28">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <SectionHeading eyebrow="Why choose us" title="Why Patients Choose Dr. SIVA'S" light />
             <div className="mt-12 grid gap-px overflow-hidden rounded-lg bg-primary-foreground/15 md:grid-cols-2 lg:grid-cols-4">
@@ -379,19 +382,19 @@ function Index() {
           </div>
         </section>
 
-        <section id="experience" className="py-20 sm:py-28">
+        <section id="experience" className="scroll-mt-20 py-16 sm:scroll-mt-24 sm:py-28">
           <div className="mx-auto grid max-w-7xl items-center gap-12 px-4 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:px-8">
             <div><SectionHeading eyebrow="Patient experience" title="A More Comfortable Dental Experience" body="We know visiting a dentist can feel daunting. Our approach centres on listening first, communicating clearly and helping you feel at ease throughout your visit." />
               <ul className="mt-8 grid gap-4 sm:grid-cols-2">{["Friendly consultation", "Clear communication", "Personalised planning", "Attention to concerns"].map((item) => <li key={item} className="flex items-center gap-3 text-sm font-semibold"><span className="grid size-6 place-items-center rounded-full bg-accent text-primary"><Check className="size-4" /></span>{item}</li>)}</ul>
               <Button asChild variant="secondary" className="mt-8"><a href={PHONE_LINK}><Phone className="size-4" />Talk to Our Clinic</a></Button>
             </div>
-            <img src={clinicImage} alt="Clean and welcoming modern dental clinic treatment room" loading="lazy" width={1200} height={900} className="aspect-[4/3] w-full rounded-lg object-cover" />
+            <img src={clinicImage} alt="Clean and welcoming modern dental clinic treatment room" loading="lazy" width={1200} height={900} className="aspect-[4/3] w-full rounded-lg object-cover object-center" />
           </div>
         </section>
 
         <ReviewsSection />
 
-        <section id="appointment" className="py-20 sm:py-28">
+        <section id="appointment" className="scroll-mt-20 py-16 sm:scroll-mt-24 sm:py-28">
           <div className="mx-auto grid max-w-7xl gap-12 px-4 sm:px-6 lg:grid-cols-[0.8fr_1.2fr] lg:px-8">
             <div><SectionHeading eyebrow="Appointments" title="Ready to Take Care of Your Smile?" body="Schedule a consultation with Dr. SIVA'S Multispeciality Dental Clinic." />
               <div className="mt-8 space-y-5 border-t border-border pt-8"><a href={PHONE_LINK} className="flex items-center gap-4"><span className="grid size-11 place-items-center rounded-md bg-primary text-primary-foreground"><Phone className="size-5" /></span><span><small className="block text-muted-foreground">Call the clinic</small><strong>{PHONE_DISPLAY}</strong></span></a><div className="flex items-center gap-4"><span className="grid size-11 place-items-center rounded-md bg-accent text-primary"><Clock3 className="size-5" /></span><span><small className="block text-muted-foreground">Open all 7 days, including Sunday</small><strong>9:00 AM – 11:00 PM</strong></span></div></div>
@@ -400,10 +403,10 @@ function Index() {
           </div>
         </section>
 
-        <section id="contact" className="bg-muted py-20 sm:py-28">
+        <section id="contact" className="scroll-mt-20 bg-muted py-16 sm:scroll-mt-24 sm:py-28">
           <div className="mx-auto grid max-w-7xl gap-8 px-4 sm:px-6 lg:grid-cols-2 lg:px-8">
             <div className="rounded-lg bg-primary p-7 text-primary-foreground sm:p-10"><p className="text-xs font-bold uppercase tracking-[0.18em] text-secondary">Visit the clinic</p><h2 className="mt-3 text-3xl font-extrabold">Dr. SIVA&apos;S Multispeciality Dental Clinic</h2><address className="mt-6 not-italic leading-7 text-primary-foreground/75">327B, Kamarajar Salai,<br />Ramakrishna Nagar, Alwartirunagar,<br />Valasaravakkam, Chennai,<br />Tamil Nadu 600087</address><p className="mt-6 font-semibold">Open all 7 days, including Sunday<br />9:00 AM – 11:00 PM</p><div className="mt-8 flex flex-col gap-3 sm:flex-row"><Button asChild variant="inverse"><a href={PHONE_LINK}><Phone className="size-4" />Call Now</a></Button><Button asChild variant="inverse"><a href={MAP_URL} target="_blank" rel="noreferrer"><Navigation className="size-4" />Get Directions</a></Button></div></div>
-            <a href={MAP_URL} target="_blank" rel="noreferrer" className="group relative min-h-96 overflow-hidden rounded-lg bg-accent"><img src={clinicImage} alt="Open the clinic location in Google Maps" loading="lazy" width={1200} height={900} className="absolute inset-0 h-full w-full object-cover opacity-35 transition-transform duration-500 group-hover:scale-105" /><div className="absolute inset-0 bg-primary/35" /><div className="relative flex h-full min-h-96 flex-col items-center justify-center p-8 text-center text-primary-foreground"><span className="grid size-16 place-items-center rounded-full bg-background text-primary shadow-xl"><Navigation className="size-7" /></span><h3 className="mt-5 text-2xl font-bold">Valasaravakkam, Chennai</h3><p className="mt-2 text-primary-foreground/80">Open location and turn-by-turn directions in Google Maps</p></div></a>
+            <a href={MAP_URL} target="_blank" rel="noreferrer" className="group relative aspect-[4/3] overflow-hidden rounded-lg bg-accent sm:aspect-auto sm:min-h-96"><img src={clinicImage} alt="Open the clinic location in Google Maps" loading="lazy" width={1200} height={900} className="absolute inset-0 h-full w-full object-cover object-center opacity-35 transition-transform duration-500 group-hover:scale-105" /><div className="absolute inset-0 bg-primary/35" /><div className="relative flex h-full min-h-0 flex-col items-center justify-center p-5 text-center text-primary-foreground sm:min-h-96 sm:p-8"><span className="grid size-14 place-items-center rounded-full bg-background text-primary shadow-xl sm:size-16"><Navigation className="size-6 sm:size-7" /></span><h3 className="mt-4 text-xl font-bold sm:mt-5 sm:text-2xl">Valasaravakkam, Chennai</h3><p className="mt-2 text-sm text-primary-foreground/80 sm:text-base">Open location and turn-by-turn directions in Google Maps</p></div></a>
           </div>
         </section>
       </main>
@@ -415,7 +418,7 @@ function Index() {
 
       <DesktopQuickActions />
 
-      <div className="fixed inset-x-0 bottom-0 z-50 grid grid-cols-3 border-t border-border bg-background/95 p-2 shadow-2xl backdrop-blur md:hidden">
+      <div className="fixed inset-x-0 bottom-0 z-50 grid grid-cols-3 border-t border-border bg-background/95 px-2 pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] shadow-2xl backdrop-blur md:hidden">
         <a href={PHONE_LINK} className="flex min-h-12 flex-col items-center justify-center gap-1 text-[11px] font-bold text-primary"><Phone className="size-5" />Call</a>
         <a href={MAP_URL} target="_blank" rel="noreferrer" className="flex min-h-12 flex-col items-center justify-center gap-1 text-[11px] font-bold text-primary"><Navigation className="size-5" />Directions</a>
         <a href="#appointment" className="flex min-h-12 flex-col items-center justify-center gap-1 rounded-md bg-primary text-[11px] font-bold text-primary-foreground"><CalendarDays className="size-5" />Book</a>

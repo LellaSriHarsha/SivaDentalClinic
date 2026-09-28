@@ -15,3 +15,4 @@
 - [x] Rename local app and documentation to SivaDentalClinic
 - [x] Rewrite the README with Sri Harsha attribution, full technology documentation, setup, privacy, and deployment guidance
 - [ ] Display at least 10 attributed reviews — blocked until five more reviews are available from a verifiable source
+- [x] Audit and correct mobile image framing, anchor offsets, review paging, spacing, and safe-area controls on top of the latest site
