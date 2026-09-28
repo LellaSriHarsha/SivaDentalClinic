@@ -11,3 +11,4 @@
 - [x] Improve WhatsApp request formatting and add 30-minute appointment slots
 - [x] Add privacy-preserving repeat-request throttling
 - [x] Add verified Google rating and attributed review excerpts
+- [x] Add paged featured reviews, correct Google listing links, Sunday messaging, and quick actions
