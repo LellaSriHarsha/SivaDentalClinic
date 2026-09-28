@@ -1,24 +1,14 @@
-# My Creative Space
+# SivaDentalClinic
 
-make sure not to leave any watermarks mentioning that it is created using lovable
-
-This project was built with [Lovable](https://lovable.dev).
-
-## Build with Lovable
-
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/6af1c0d9-3614-40fd-a50c-e0d23bd5297c).
-
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
+Website for Dr. SIVA'S Multispeciality Dental Clinic in Valasaravakkam, Chennai.
 
 ## Development
 
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
+To run the website locally, install Node.js and npm.
 
 ```sh
 git clone <this-repository-url>
-cd <repository-name>
+cd SivaDentalClinic
 npm i
 npm run dev
 ```

@@ -13,3 +13,4 @@
 - Appointment requests remain client-side acknowledgements until a clinic-approved delivery system is connected, preventing false confirmations.
 - Appointment rate limiting stores only salted one-way phone/IP fingerprints and timestamps, because patient request contents remain WhatsApp-only.
 - Google review excerpts are snapshot content from the verified Places listing and retain reviewer attribution and Google links.
+- Use `siva-dental-clinic` as the package name and `SivaDentalClinic` as the repository-facing project name for clear clinic branding.

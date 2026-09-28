@@ -12,3 +12,5 @@
 - [x] Add privacy-preserving repeat-request throttling
 - [x] Add verified Google rating and attributed review excerpts
 - [x] Add paged featured reviews, correct Google listing links, Sunday messaging, and quick actions
+- [x] Rename local app and documentation to SivaDentalClinic
+- [ ] Display at least 10 attributed reviews — blocked until five more reviews are available from a verifiable source
