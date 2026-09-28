@@ -1,0 +1,68 @@
+name: Deploy website to GitHub Pages
+
+# Builds the clinic website as plain static files and publishes them to GitHub Pages.
+# The site is served from https://lellasriharsha.github.io/SivaDentalClinic/.
+# If the repository is ever renamed or moved to a custom domain, update BASE_PATH below.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Install Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Build the static website
+        env:
+          GITHUB_PAGES: "true"
+          BASE_PATH: /SivaDentalClinic/
+        run: bun run build
+
+      - name: Prepare the published files
+        run: |
+          set -euo pipefail
+          test -f .output/public/index.html
+          # GitHub Pages serves 404.html for unknown paths, so deep links still open the site.
+          cp .output/public/index.html .output/public/404.html
+          # Stops GitHub Pages from running Jekyll over the build output.
+          touch .output/public/.nojekyll
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload the website
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .output/public
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
