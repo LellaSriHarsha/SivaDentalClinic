@@ -13,4 +13,5 @@
 - [x] Add verified Google rating and attributed review excerpts
 - [x] Add paged featured reviews, correct Google listing links, Sunday messaging, and quick actions
 - [x] Rename local app and documentation to SivaDentalClinic
+- [x] Rewrite the README with Sri Harsha attribution, full technology documentation, setup, privacy, and deployment guidance
 - [ ] Display at least 10 attributed reviews — blocked until five more reviews are available from a verifiable source
