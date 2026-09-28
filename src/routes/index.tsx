@@ -3,9 +3,11 @@ import {
   ArrowRight,
   CalendarDays,
   Check,
+  ChevronDown,
   Clock3,
   HeartHandshake,
   Menu,
+  MessageCircle,
   Navigation,
   Phone,
   ShieldCheck,
@@ -16,6 +18,7 @@ import {
   X,
 } from "lucide-react";
 import { useState, type FormEvent } from "react";
+import { z } from "zod";
 
 import clinicImage from "@/assets/dental-clinic.jpg";
 import consultationImage from "@/assets/dental-consultation.jpg";
@@ -33,6 +36,7 @@ const navItems = [
   ["Services", "#services"],
   ["Why Choose Us", "#why-us"],
   ["Patient Experience", "#experience"],
+  ["FAQ", "#faq"],
   ["Contact", "#contact"],
 ];
 
@@ -85,6 +89,14 @@ export const Route = createFileRoute("/")({
           },
           openingHours: "Mo-Su 09:00-23:00",
           hasMap: MAP_URL,
+        }),
+      },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: faqs.map(([q, a]) => ({ "@type": "Question", name: q, acceptedAnswer: { "@type": "Answer", text: a } })),
         }),
       },
     ],
@@ -152,34 +164,91 @@ function SectionHeading({ eyebrow, title, body, light = false }: { eyebrow: stri
   );
 }
 
+const reasonOptions = [...services.map(([name]) => name), "General Consultation"] as string[];
+const appointmentSchema = z.object({
+  name: z.string().trim().min(2, "Please enter your name").max(80, "Name is too long").regex(/^[\p{L} .'-]+$/u, "Use letters only"),
+  phone: z.string().trim().regex(/^(\+?91[\s-]?)?[6-9]\d{4}[\s-]?\d{5}$/, "Enter a valid Indian mobile number"),
+  email: z.union([z.literal(""), z.string().trim().email("Enter a valid email").max(120)]),
+  date: z.string().refine((v) => { const d = new Date(v); const t = new Date(); t.setHours(0, 0, 0, 0); return !isNaN(d.getTime()) && d >= t; }, "Choose today or a future date"),
+  time: z.enum(["Morning", "Afternoon", "Evening"], { errorMap: () => ({ message: "Select a time" }) }),
+  reason: z.string({ required_error: "Select a treatment" }).refine((v) => reasonOptions.includes(v), "Select a treatment"),
+  message: z.string().trim().max(500, "Keep the message under 500 characters"),
+});
+
+const faqs = [
+  ["What are the clinic hours?", "The clinic is open every day, 9:00 AM to 11:00 PM."],
+  ["Do I need an appointment?", "We recommend booking ahead so the clinic can reserve a time for you. Please call to confirm availability."],
+  ["What should I do in a dental emergency?", "Call the clinic directly during opening hours so the team can advise you on the next steps."],
+  ["Is root canal treatment painful?", "Treatment is performed with local anaesthesia and a comfort-focused approach. Your dentist will explain what to expect."],
+  ["Am I suitable for implants or aligners?", "Suitability depends on a clinical assessment. Book a consultation to discuss your options."],
+  ["Where is the clinic located?", "327B, Kamarajar Salai, Ramakrishna Nagar, Alwartirunagar, Valasaravakkam, Chennai 600087."],
+] as const;
+
 function AppointmentForm() {
-  const [submitted, setSubmitted] = useState(false);
+  const [whatsappUrl, setWhatsappUrl] = useState<string | null>(null);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const today = new Date().toISOString().split("T")[0];
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setSubmitted(true);
+    const raw = Object.fromEntries(new FormData(event.currentTarget)) as Record<string, string>;
+    if (raw["website"]) return; // spam trap
+    const result = appointmentSchema.safeParse(raw);
+    if (!result.success) {
+      const next: Record<string, string> = {};
+      for (const issue of result.error.issues) next[String(issue.path[0])] ??= issue.message;
+      setErrors(next);
+      return;
+    }
+    const d = result.data;
+    const text = `Appointment request\nName: ${d.name}\nPhone: ${d.phone}${d.email ? `\nEmail: ${d.email}` : ""}\nDate: ${d.date} (${d.time})\nReason: ${d.reason}${d.message ? `\nMessage: ${d.message}` : ""}`;
+    setErrors({});
+    setWhatsappUrl(`https://wa.me/919345150623?text=${encodeURIComponent(text)}`);
   }
-  if (submitted) {
+  const err = (k: string) => errors[k] && <span className="text-xs font-medium text-destructive">{errors[k]}</span>;
+  if (whatsappUrl) {
     return (
       <div className="flex min-h-[420px] flex-col items-center justify-center rounded-lg border border-secondary/40 bg-accent p-8 text-center" role="status">
         <span className="mb-5 grid size-14 place-items-center rounded-full bg-secondary text-secondary-foreground"><Check className="size-7" /></span>
         <h3 className="text-2xl font-bold">Your request is ready</h3>
-        <p className="mt-3 max-w-md text-muted-foreground">Thank you. Please call the clinic to share and confirm your preferred appointment time.</p>
-        <Button asChild className="mt-6"><a href={PHONE_LINK}><Phone className="size-4" />Call {PHONE_DISPLAY}</a></Button>
+        <p className="mt-3 max-w-md text-muted-foreground">Send it to the clinic on WhatsApp or call to confirm your preferred time. It is not booked until the clinic confirms.</p>
+        <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+          <Button asChild><a href={whatsappUrl} target="_blank" rel="noopener noreferrer"><MessageCircle className="size-4" />Send on WhatsApp</a></Button>
+          <Button asChild variant="secondary"><a href={PHONE_LINK}><Phone className="size-4" />Call {PHONE_DISPLAY}</a></Button>
+        </div>
       </div>
     );
   }
   return (
-    <form onSubmit={submit} className="grid gap-4 rounded-lg bg-background p-5 shadow-xl shadow-primary/10 sm:grid-cols-2 sm:p-8">
-      <label className="grid gap-2 text-sm font-semibold">Full Name<input required name="name" autoComplete="name" className={inputClass} placeholder="Your name" /></label>
-      <label className="grid gap-2 text-sm font-semibold">Phone Number<input required name="phone" type="tel" autoComplete="tel" className={inputClass} placeholder="Your phone number" /></label>
-      <label className="grid gap-2 text-sm font-semibold">Email<input name="email" type="email" autoComplete="email" className={inputClass} placeholder="you@example.com" /></label>
-      <label className="grid gap-2 text-sm font-semibold">Preferred Date<input required name="date" type="date" className={inputClass} /></label>
-      <label className="grid gap-2 text-sm font-semibold">Preferred Time<select required name="time" className={inputClass} defaultValue=""><option value="" disabled>Select a time</option><option>Morning</option><option>Afternoon</option><option>Evening</option></select></label>
-      <label className="grid gap-2 text-sm font-semibold">Reason for Visit<select required name="reason" className={inputClass} defaultValue=""><option value="" disabled>Select a treatment</option>{services.map(([name]) => <option key={name}>{name}</option>)}<option>General Consultation</option></select></label>
-      <label className="grid gap-2 text-sm font-semibold sm:col-span-2">Message<textarea name="message" rows={4} className="w-full rounded-md border border-input bg-background px-4 py-3 text-sm outline-none placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-ring/20" placeholder="Tell us how we can help" /></label>
-      <Button type="submit" size="lg" className="sm:col-span-2">Request Appointment<ArrowRight className="size-4" /></Button>
-      <p className="text-center text-xs text-muted-foreground sm:col-span-2">This sends a request only. The clinic will confirm availability with you.</p>
+    <form onSubmit={submit} noValidate className="grid gap-4 rounded-lg bg-background p-5 shadow-xl shadow-primary/10 sm:grid-cols-2 sm:p-8">
+      <input type="text" name="website" tabIndex={-1} autoComplete="off" aria-hidden="true" className="hidden" />
+      <label className="grid gap-2 text-sm font-semibold">Full Name<input required name="name" maxLength={80} autoComplete="name" className={inputClass} placeholder="Your name" />{err("name")}</label>
+      <label className="grid gap-2 text-sm font-semibold">Phone Number<input required name="phone" maxLength={16} type="tel" autoComplete="tel" className={inputClass} placeholder="98765 43210" />{err("phone")}</label>
+      <label className="grid gap-2 text-sm font-semibold">Email (optional)<input name="email" maxLength={120} type="email" autoComplete="email" className={inputClass} placeholder="you@example.com" />{err("email")}</label>
+      <label className="grid gap-2 text-sm font-semibold">Preferred Date<input required name="date" type="date" min={today} className={inputClass} />{err("date")}</label>
+      <label className="grid gap-2 text-sm font-semibold">Preferred Time<select required name="time" className={inputClass} defaultValue=""><option value="" disabled>Select a time</option><option>Morning</option><option>Afternoon</option><option>Evening</option></select>{err("time")}</label>
+      <label className="grid gap-2 text-sm font-semibold">Reason for Visit<select required name="reason" className={inputClass} defaultValue=""><option value="" disabled>Select a treatment</option>{reasonOptions.map((name) => <option key={name}>{name}</option>)}</select>{err("reason")}</label>
+      <label className="grid gap-2 text-sm font-semibold sm:col-span-2">Message<textarea name="message" rows={4} maxLength={500} className="w-full rounded-md border border-input bg-background px-4 py-3 text-sm outline-none placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-ring/20" placeholder="Tell us how we can help" />{err("message")}</label>
+      <Button type="submit" size="lg" className="sm:col-span-2">Prepare Appointment Request<ArrowRight className="size-4" /></Button>
+      <p className="text-center text-xs text-muted-foreground sm:col-span-2">Your details stay on your device until you choose to send them. The clinic will confirm availability.</p>
     </form>
+  );
+}
+
+function FaqSection() {
+  return (
+    <section id="faq" className="bg-muted py-20 sm:py-28">
+      <div className="mx-auto grid max-w-7xl gap-12 px-4 sm:px-6 lg:grid-cols-[0.8fr_1.2fr] lg:px-8">
+        <SectionHeading eyebrow="FAQ" title="Common Patient Questions" body="Quick answers before your visit. For anything specific, please call the clinic." />
+        <div className="grid gap-3">
+          {faqs.map(([q, a]) => (
+            <details key={q} className="group rounded-lg border border-border bg-background p-5 open:border-secondary">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-bold">{q}<ChevronDown className="size-5 shrink-0 text-secondary transition-transform group-open:rotate-180" /></summary>
+              <p className="mt-3 text-sm leading-6 text-muted-foreground">{a}</p>
+            </details>
+          ))}
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -279,6 +348,8 @@ function Index() {
             <AppointmentForm />
           </div>
         </section>
+
+        <FaqSection />
 
         <section id="contact" className="bg-muted py-20 sm:py-28">
           <div className="mx-auto grid max-w-7xl gap-8 px-4 sm:px-6 lg:grid-cols-2 lg:px-8">
