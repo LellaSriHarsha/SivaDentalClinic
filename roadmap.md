@@ -7,3 +7,7 @@
 - [x] Security hardening: input validation, spam trap, protective browser headers
 - [x] Remove FAQ section; integrate uploaded Shiny Smiles logo (header + favicon)
 - [x] Form delivery decision: WhatsApp only, no stored data
+
+- [x] Improve WhatsApp request formatting and add 30-minute appointment slots
+- [x] Add privacy-preserving repeat-request throttling
+- [x] Add verified Google rating and attributed review excerpts

@@ -11,3 +11,5 @@
 
 - Keep the clinic as a single-page, anchor-based site because its primary journey is immediate appointment or phone conversion.
 - Appointment requests remain client-side acknowledgements until a clinic-approved delivery system is connected, preventing false confirmations.
+- Appointment rate limiting stores only salted one-way phone/IP fingerprints and timestamps, because patient request contents remain WhatsApp-only.
+- Google review excerpts are snapshot content from the verified Places listing and retain reviewer attribution and Google links.

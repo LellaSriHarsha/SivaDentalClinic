@@ -30,12 +30,42 @@ const PHONE_LINK = "tel:+919345150623";
 const MAP_URL =
   "https://www.google.co.in/maps/place/Dr.+SIVA'S+MULTISPECIALITY+DENTAL+CLINIC/@13.0454897,80.1794364,16.05z/data=!4m6!3m5!1s0x3a5261ab3902e17d:0xcf9f0f58692a7a1!8m2!3d13.0452946!4d80.1842209";
 
+const timeSlots = Array.from({ length: 28 }, (_, index) => {
+  const minutes = 9 * 60 + index * 30;
+  const hour = Math.floor(minutes / 60);
+  const minute = minutes % 60;
+  const suffix = hour >= 12 ? "PM" : "AM";
+  return `${hour % 12 || 12}:${minute.toString().padStart(2, "0")} ${suffix}`;
+});
+
+const googleReviews = [
+  {
+    author: "Karthik",
+    when: "2 months ago",
+    text: "The doctor was highly professional, patient, and explained every step clearly, which made me feel comfortable and confident. The clinic was clean, well-maintained, and the staff were friendly and supportive.",
+    url: "https://www.google.com/maps/reviews/data=!4m6!14m5!1m4!2m3!1sCi9DQUlRQUNvZENodHljRjlvT21oTldrWnVWMlpJUTNCRWNqRm1iMkZzVldkZlEyYxAB!2m1!1s0x3a5261ab3902e17d:0xcf9f0f58692a7a1",
+  },
+  {
+    author: "Kev L",
+    when: "5 months ago",
+    text: "From the onset everything was explained clearly and the process and procedures listed out step by step with utmost clarity for easy understanding. Both are brilliant young doctors.",
+    url: "https://www.google.com/maps/reviews/data=!4m6!14m5!1m4!2m3!1sCi9DQUlRQUNvZENodHljRjlvT2xWbkxXNTZORkpGZGtoRlFXc3dXWE15Ykc0dFVHYxAB!2m1!1s0x3a5261ab3902e17d:0xcf9f0f58692a7a1",
+  },
+  {
+    author: "Gokul Sankar",
+    when: "6 months ago",
+    text: "Visited Dr. Siva for wisdom tooth extraction and cleaning. He was patient and explained everything before starting. The procedure was smooth and the staff were supportive.",
+    url: "https://www.google.com/maps/reviews/data=!4m6!14m5!1m4!2m3!1sCi9DQUlRQUNvZENodHljRjlvT2s1cWJrcDRZV2d5TUdkUFIwOVZORWxhZVZsbU5HYxAB!2m1!1s0x3a5261ab3902e17d:0xcf9f0f58692a7a1",
+  },
+] as const;
+
 const navItems = [
   ["Home", "#home"],
   ["About", "#about"],
   ["Services", "#services"],
   ["Why Choose Us", "#why-us"],
   ["Patient Experience", "#experience"],
+  ["Reviews", "#reviews"],
   ["Contact", "#contact"],
 ];
 
@@ -159,7 +189,7 @@ const appointmentSchema = z.object({
   phone: z.string().trim().regex(/^(\+?91[\s-]?)?[6-9]\d{4}[\s-]?\d{5}$/, "Enter a valid Indian mobile number"),
   email: z.union([z.literal(""), z.string().trim().email("Enter a valid email").max(120)]),
   date: z.string().refine((v) => { const d = new Date(v); const t = new Date(); t.setHours(0, 0, 0, 0); return !isNaN(d.getTime()) && d >= t; }, "Choose today or a future date"),
-  time: z.enum(["Morning", "Afternoon", "Evening"], { errorMap: () => ({ message: "Select a time" }) }),
+  time: z.string().refine((value) => timeSlots.includes(value), "Select a time slot"),
   reason: z.string({ required_error: "Select a treatment" }).refine((v) => reasonOptions.includes(v), "Select a treatment"),
   message: z.string().trim().max(500, "Keep the message under 500 characters"),
 });
@@ -168,8 +198,10 @@ const appointmentSchema = z.object({
 function AppointmentForm() {
   const [whatsappUrl, setWhatsappUrl] = useState<string | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
   const today = new Date().toISOString().split("T")[0];
-  function submit(event: FormEvent<HTMLFormElement>) {
+  async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const raw = Object.fromEntries(new FormData(event.currentTarget)) as Record<string, string>;
     if (raw["website"]) return; // spam trap
@@ -181,16 +213,47 @@ function AppointmentForm() {
       return;
     }
     const d = result.data;
-    const text = `Appointment request\nName: ${d.name}\nPhone: ${d.phone}${d.email ? `\nEmail: ${d.email}` : ""}\nDate: ${d.date} (${d.time})\nReason: ${d.reason}${d.message ? `\nMessage: ${d.message}` : ""}`;
     setErrors({});
-    setWhatsappUrl(`https://wa.me/919345150623?text=${encodeURIComponent(text)}`);
+    setSubmitError("");
+    setIsSubmitting(true);
+    try {
+      const response = await fetch("/api/appointment-check", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(d),
+      });
+      const payload = await response.json() as { allowed?: boolean; error?: string };
+      if (!response.ok || !payload.allowed) {
+        setSubmitError(payload.error ?? "We could not prepare your request. Please call the clinic.");
+        return;
+      }
+      const text = [
+        "🦷 *APPOINTMENT REQUEST*",
+        "",
+        `👤 *Name:* ${d.name}`,
+        `📞 *Phone:* ${d.phone}`,
+        ...(d.email ? [`✉️ *Email:* ${d.email}`] : []),
+        `📅 *Preferred date:* ${d.date}`,
+        `🕐 *Preferred time:* ${d.time}`,
+        `🩺 *Reason for visit:* ${d.reason}`,
+        ...(d.message ? ["", `💬 *Message:* ${d.message}`] : []),
+        "",
+        "✅ Please confirm whether this appointment time is available.",
+        "_This is an appointment request, not a confirmed booking._",
+      ].join("\n");
+      setWhatsappUrl(`https://wa.me/919345150623?text=${encodeURIComponent(text)}`);
+    } catch {
+      setSubmitError("We could not prepare your request. Please call the clinic.");
+    } finally {
+      setIsSubmitting(false);
+    }
   }
   const err = (k: string) => errors[k] && <span className="text-xs font-medium text-destructive">{errors[k]}</span>;
   if (whatsappUrl) {
     return (
       <div className="flex min-h-[420px] flex-col items-center justify-center rounded-lg border border-secondary/40 bg-accent p-8 text-center" role="status">
         <span className="mb-5 grid size-14 place-items-center rounded-full bg-secondary text-secondary-foreground"><Check className="size-7" /></span>
-        <h3 className="text-2xl font-bold">Your request is ready</h3>
+        <h3 className="text-3xl font-extrabold sm:text-4xl">Your appointment request is ready</h3>
         <p className="mt-3 max-w-md text-muted-foreground">Send it to the clinic on WhatsApp or call to confirm your preferred time. It is not booked until the clinic confirms.</p>
         <div className="mt-6 flex flex-col gap-3 sm:flex-row">
           <Button asChild><a href={whatsappUrl} target="_blank" rel="noopener noreferrer"><MessageCircle className="size-4" />Send on WhatsApp</a></Button>
@@ -202,14 +265,15 @@ function AppointmentForm() {
   return (
     <form onSubmit={submit} noValidate className="grid gap-4 rounded-lg bg-background p-5 shadow-xl shadow-primary/10 sm:grid-cols-2 sm:p-8">
       <input type="text" name="website" tabIndex={-1} autoComplete="off" aria-hidden="true" className="hidden" />
-      <label className="grid gap-2 text-sm font-semibold">Full Name<input required name="name" maxLength={80} autoComplete="name" className={inputClass} placeholder="Your name" />{err("name")}</label>
-      <label className="grid gap-2 text-sm font-semibold">Phone Number<input required name="phone" maxLength={16} type="tel" autoComplete="tel" className={inputClass} placeholder="98765 43210" />{err("phone")}</label>
+       <label className="grid gap-2 text-sm font-semibold"><span>Full Name <span className="sr-only">required</span><span aria-hidden="true" className="text-destructive">*</span></span><input required name="name" maxLength={80} autoComplete="name" className={inputClass} placeholder="Your name" />{err("name")}</label>
+       <label className="grid gap-2 text-sm font-semibold"><span>Phone Number <span className="sr-only">required</span><span aria-hidden="true" className="text-destructive">*</span></span><input required name="phone" maxLength={16} type="tel" inputMode="tel" autoComplete="tel" className={inputClass} placeholder="98765 43210" />{err("phone")}</label>
       <label className="grid gap-2 text-sm font-semibold">Email (optional)<input name="email" maxLength={120} type="email" autoComplete="email" className={inputClass} placeholder="you@example.com" />{err("email")}</label>
       <label className="grid gap-2 text-sm font-semibold">Preferred Date<input required name="date" type="date" min={today} className={inputClass} />{err("date")}</label>
-      <label className="grid gap-2 text-sm font-semibold">Preferred Time<select required name="time" className={inputClass} defaultValue=""><option value="" disabled>Select a time</option><option>Morning</option><option>Afternoon</option><option>Evening</option></select>{err("time")}</label>
+       <label className="grid gap-2 text-sm font-semibold">Preferred Time Slot<select required name="time" className={inputClass} defaultValue=""><option value="" disabled>Select a time slot</option>{timeSlots.map((slot) => <option key={slot} value={slot}>{slot}</option>)}</select>{err("time")}</label>
       <label className="grid gap-2 text-sm font-semibold">Reason for Visit<select required name="reason" className={inputClass} defaultValue=""><option value="" disabled>Select a treatment</option>{reasonOptions.map((name) => <option key={name}>{name}</option>)}</select>{err("reason")}</label>
       <label className="grid gap-2 text-sm font-semibold sm:col-span-2">Message<textarea name="message" rows={4} maxLength={500} className="w-full rounded-md border border-input bg-background px-4 py-3 text-sm outline-none placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-ring/20" placeholder="Tell us how we can help" />{err("message")}</label>
-      <Button type="submit" size="lg" className="sm:col-span-2">Prepare Appointment Request<ArrowRight className="size-4" /></Button>
+       {submitError && <p role="alert" className="rounded-md bg-destructive/10 p-3 text-center text-sm font-semibold text-destructive sm:col-span-2">{submitError}</p>}
+       <Button type="submit" size="lg" disabled={isSubmitting} className="min-h-14 text-base font-extrabold sm:col-span-2">{isSubmitting ? "Preparing request…" : "Prepare Appointment Request"}<ArrowRight className="size-5" /></Button>
       <p className="text-center text-xs text-muted-foreground sm:col-span-2">Your details stay on your device until you choose to send them. The clinic will confirm availability.</p>
     </form>
   );
@@ -296,10 +360,21 @@ function Index() {
           </div>
         </section>
 
-        <section className="bg-accent py-16">
-          <div className="mx-auto flex max-w-7xl flex-col items-start justify-between gap-8 px-4 sm:px-6 md:flex-row md:items-center lg:px-8">
-            <div><div className="flex items-center gap-1 text-secondary">{Array.from({ length: 5 }).map((_, index) => <Star key={index} className="size-5 fill-current" />)}</div><h2 className="mt-3 text-3xl font-extrabold">Rated 5.0 by patients</h2><p className="mt-2 text-muted-foreground">Google/local listing rating with more than 70 reviews.</p></div>
-            <Button asChild size="lg"><a href={MAP_URL} target="_blank" rel="noreferrer">Read Our Reviews on Google<ArrowRight className="size-4" /></a></Button>
+        <section id="reviews" className="bg-accent py-20 sm:py-28">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col items-start justify-between gap-7 md:flex-row md:items-end">
+              <div><div className="flex items-center gap-1 text-secondary" aria-label="5 out of 5 stars">{Array.from({ length: 5 }).map((_, index) => <Star key={index} className="size-5 fill-current" />)}</div><h2 className="mt-3 text-3xl font-extrabold sm:text-4xl">5.0 from 77 Google reviews</h2><p className="mt-3 text-muted-foreground">Recent feedback shared publicly by clinic patients on Google.</p></div>
+              <Button asChild size="lg"><a href={MAP_URL} target="_blank" rel="noreferrer">View all reviews on Google<ArrowRight className="size-4" /></a></Button>
+            </div>
+            <div className="mt-10 grid gap-4 lg:grid-cols-3">
+              {googleReviews.map((review) => (
+                <article key={review.author} className="flex min-h-64 flex-col rounded-lg border border-border bg-background p-6 shadow-sm">
+                  <div className="flex items-center justify-between gap-4"><div className="flex gap-1 text-secondary" aria-label="5 stars">{Array.from({ length: 5 }).map((_, index) => <Star key={index} className="size-4 fill-current" />)}</div><span className="text-xs text-muted-foreground">{review.when}</span></div>
+                  <blockquote className="mt-5 flex-1 text-sm leading-7 text-foreground/80">“{review.text}”</blockquote>
+                  <div className="mt-6 flex items-center justify-between gap-3 border-t border-border pt-4"><strong>{review.author}</strong><a href={review.url} target="_blank" rel="noreferrer" className="text-sm font-bold text-primary hover:underline">View on Google</a></div>
+                </article>
+              ))}
+            </div>
           </div>
         </section>
 

@@ -14,13 +14,41 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      appointment_rate_limits: {
+        Row: {
+          created_at: string
+          id: string
+          ip_fingerprint: string
+          phone_fingerprint: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          ip_fingerprint: string
+          phone_fingerprint: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          ip_fingerprint?: string
+          phone_fingerprint?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      check_appointment_rate_limit: {
+        Args: {
+          _ip_fingerprint: string
+          _limit?: number
+          _phone_fingerprint: string
+          _window?: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
