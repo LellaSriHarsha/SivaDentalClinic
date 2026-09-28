@@ -290,9 +290,8 @@ function ReviewsSection() {
             </article>
           ))}
         </div>
-        <div className="mt-7 grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 sm:mx-auto sm:max-w-md sm:gap-4">
+        <div className="mt-7 flex items-center justify-center gap-3 sm:gap-4">
           <Button type="button" variant="outline" size="icon" onClick={() => setReviewPage((page) => (Math.min(page, pageCount - 1) - 1 + pageCount) % pageCount)} aria-label="Show previous reviews"><ChevronLeft className="size-5" /></Button>
-          <span className="text-center text-xs font-semibold text-muted-foreground sm:text-sm" aria-live="polite">Reviews {safeReviewPage * reviewsPerPage + 1}–{Math.min((safeReviewPage + 1) * reviewsPerPage, googleReviews.length)} of {googleReviews.length} featured</span>
           <Button type="button" variant="outline" size="icon" onClick={() => setReviewPage((page) => (Math.min(page, pageCount - 1) + 1) % pageCount)} aria-label="Show next reviews"><ChevronRight className="size-5" /></Button>
         </div>
       </div>
