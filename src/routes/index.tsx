@@ -191,7 +191,7 @@ function AppointmentForm() {
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const raw = Object.fromEntries(new FormData(event.currentTarget)) as Record<string, string>;
-    if (raw.website) return; // spam trap
+    if (raw["website"]) return; // spam trap
     const result = appointmentSchema.safeParse(raw);
     if (!result.success) {
       const next: Record<string, string> = {};
