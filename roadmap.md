@@ -5,3 +5,5 @@
 - [x] Verify calls, directions, booking flow, mobile layout, metadata, and claims
 - [x] Research-based additions: FAQ (with search markup), WhatsApp request sending, stronger form checks
 - [x] Security hardening: input validation, spam trap, protective browser headers
+- [x] Remove FAQ section; integrate uploaded Shiny Smiles logo (header + favicon)
+- [x] Form delivery decision: WhatsApp only, no stored data
