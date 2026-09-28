@@ -8,3 +8,6 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Keep the clinic as a single-page, anchor-based site because its primary journey is immediate appointment or phone conversion.
+- Appointment requests remain client-side acknowledgements until a clinic-approved delivery system is connected, preventing false confirmations.
