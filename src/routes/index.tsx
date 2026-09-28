@@ -170,8 +170,8 @@ const appointmentSchema = z.object({
   phone: z.string().trim().regex(/^(\+?91[\s-]?)?[6-9]\d{4}[\s-]?\d{5}$/, "Enter a valid Indian mobile number"),
   email: z.union([z.literal(""), z.string().trim().email("Enter a valid email").max(120)]),
   date: z.string().refine((v) => { const d = new Date(v); const t = new Date(); t.setHours(0, 0, 0, 0); return !isNaN(d.getTime()) && d >= t; }, "Choose today or a future date"),
-  time: z.enum(["Morning", "Afternoon", "Evening"], { errorMap: () => ({ message: "Select a time" }) }),
-  reason: z.string().refine((v) => reasonOptions.includes(v), "Select a treatment"),
+  time: z.enum(["Morning", "Afternoon", "Evening"], { required_error: "Select a time", errorMap: () => ({ message: "Select a time" }) }),
+  reason: z.string({ required_error: "Select a treatment" }).refine((v) => reasonOptions.includes(v), "Select a treatment"),
   message: z.string().trim().max(500, "Keep the message under 500 characters"),
 });
 
