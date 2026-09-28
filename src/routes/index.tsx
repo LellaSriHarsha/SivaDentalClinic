@@ -65,6 +65,7 @@ const navItems = [
   ["Services", "#services"],
   ["Why Choose Us", "#why-us"],
   ["Patient Experience", "#experience"],
+  ["Reviews", "#reviews"],
   ["Contact", "#contact"],
 ];
 
@@ -264,8 +265,8 @@ function AppointmentForm() {
   return (
     <form onSubmit={submit} noValidate className="grid gap-4 rounded-lg bg-background p-5 shadow-xl shadow-primary/10 sm:grid-cols-2 sm:p-8">
       <input type="text" name="website" tabIndex={-1} autoComplete="off" aria-hidden="true" className="hidden" />
-       <label className="grid gap-2 text-sm font-semibold">Full Name <span className="sr-only">required</span><span aria-hidden="true" className="text-destructive">*</span><input required name="name" maxLength={80} autoComplete="name" className={inputClass} placeholder="Your name" />{err("name")}</label>
-       <label className="grid gap-2 text-sm font-semibold">Phone Number <span className="sr-only">required</span><span aria-hidden="true" className="text-destructive">*</span><input required name="phone" maxLength={16} type="tel" inputMode="tel" autoComplete="tel" className={inputClass} placeholder="98765 43210" />{err("phone")}</label>
+       <label className="grid gap-2 text-sm font-semibold"><span>Full Name <span className="sr-only">required</span><span aria-hidden="true" className="text-destructive">*</span></span><input required name="name" maxLength={80} autoComplete="name" className={inputClass} placeholder="Your name" />{err("name")}</label>
+       <label className="grid gap-2 text-sm font-semibold"><span>Phone Number <span className="sr-only">required</span><span aria-hidden="true" className="text-destructive">*</span></span><input required name="phone" maxLength={16} type="tel" inputMode="tel" autoComplete="tel" className={inputClass} placeholder="98765 43210" />{err("phone")}</label>
       <label className="grid gap-2 text-sm font-semibold">Email (optional)<input name="email" maxLength={120} type="email" autoComplete="email" className={inputClass} placeholder="you@example.com" />{err("email")}</label>
       <label className="grid gap-2 text-sm font-semibold">Preferred Date<input required name="date" type="date" min={today} className={inputClass} />{err("date")}</label>
        <label className="grid gap-2 text-sm font-semibold">Preferred Time Slot<select required name="time" className={inputClass} defaultValue=""><option value="" disabled>Select a time slot</option>{timeSlots.map((slot) => <option key={slot} value={slot}>{slot}</option>)}</select>{err("time")}</label>
@@ -359,10 +360,21 @@ function Index() {
           </div>
         </section>
 
-        <section className="bg-accent py-16">
-          <div className="mx-auto flex max-w-7xl flex-col items-start justify-between gap-8 px-4 sm:px-6 md:flex-row md:items-center lg:px-8">
-            <div><div className="flex items-center gap-1 text-secondary">{Array.from({ length: 5 }).map((_, index) => <Star key={index} className="size-5 fill-current" />)}</div><h2 className="mt-3 text-3xl font-extrabold">Rated 5.0 by patients</h2><p className="mt-2 text-muted-foreground">Google/local listing rating with more than 70 reviews.</p></div>
-            <Button asChild size="lg"><a href={MAP_URL} target="_blank" rel="noreferrer">Read Our Reviews on Google<ArrowRight className="size-4" /></a></Button>
+        <section id="reviews" className="bg-accent py-20 sm:py-28">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col items-start justify-between gap-7 md:flex-row md:items-end">
+              <div><div className="flex items-center gap-1 text-secondary" aria-label="5 out of 5 stars">{Array.from({ length: 5 }).map((_, index) => <Star key={index} className="size-5 fill-current" />)}</div><h2 className="mt-3 text-3xl font-extrabold sm:text-4xl">5.0 from 77 Google reviews</h2><p className="mt-3 text-muted-foreground">Recent feedback shared publicly by clinic patients on Google.</p></div>
+              <Button asChild size="lg"><a href={MAP_URL} target="_blank" rel="noreferrer">View all reviews on Google<ArrowRight className="size-4" /></a></Button>
+            </div>
+            <div className="mt-10 grid gap-4 lg:grid-cols-3">
+              {googleReviews.map((review) => (
+                <article key={review.author} className="flex min-h-64 flex-col rounded-lg border border-border bg-background p-6 shadow-sm">
+                  <div className="flex items-center justify-between gap-4"><div className="flex gap-1 text-secondary" aria-label="5 stars">{Array.from({ length: 5 }).map((_, index) => <Star key={index} className="size-4 fill-current" />)}</div><span className="text-xs text-muted-foreground">{review.when}</span></div>
+                  <blockquote className="mt-5 flex-1 text-sm leading-7 text-foreground/80">“{review.text}”</blockquote>
+                  <div className="mt-6 flex items-center justify-between gap-3 border-t border-border pt-4"><strong>{review.author}</strong><a href={review.url} target="_blank" rel="noreferrer" className="text-sm font-bold text-primary hover:underline">View on Google</a></div>
+                </article>
+              ))}
+            </div>
           </div>
         </section>
 
