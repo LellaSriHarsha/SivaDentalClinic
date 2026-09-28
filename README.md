@@ -154,6 +154,7 @@ npm run dev
 | `bun run dev` | Starts the local development website |
 | `bun run build` | Creates an optimized production build |
 | `bun run build:dev` | Creates a build using development settings |
+| `bun run build:pages` | Creates the static GitHub Pages build inside `.output/public` |
 | `bun run preview` | Serves the production build locally for review |
 | `bun run lint` | Checks the source code for linting problems |
 | `bun run format` | Formats the project files with Prettier |
@@ -180,6 +181,23 @@ Before deploying a separate copy, confirm that the following values belong to th
 4. Deploy the generated application through a compatible hosting platform.
 5. Test calling, directions, WhatsApp delivery, appointment preparation, review links, and mobile navigation on the live domain.
 
+### GitHub Pages (static hosting)
+
+GitHub Pages serves files only. It cannot render HTML per request and it cannot run the `/api/appointment-check` server route, so the default full-stack build cannot be published there. The repository therefore includes a static build path:
+
+- `.github/workflows/deploy-to-github-pages.yml` builds the site with `GITHUB_PAGES=true` and `BASE_PATH=/SivaDentalClinic/`, prerenders the page into `.output/public/index.html`, copies it to `404.html` for direct links, and publishes the folder to GitHub Pages.
+- The workflow runs on every push to `main` and can also be started manually from the Actions tab.
+- The site is published at `https://lellasriharsha.github.io/SivaDentalClinic/`. If the repository is renamed, moved to an organisation, or served from a custom domain, update `BASE_PATH` in the workflow and the `build:pages` script together.
+
+GitHub Pages must be pointed at the workflow once: open **Settings → Pages → Build and deployment** and set **Source** to **GitHub Actions**. While the source is set to **Deploy from a branch**, GitHub Pages publishes the raw branch contents instead, which renders this README through Jekyll and shows no website.
+
+To reproduce the static build locally:
+
+```sh
+bun run build:pages
+npx serve .output/public   # or any static file server
+```
+
 ## Current limitations
 
 - Appointment requests are delivered through WhatsApp only; they are not saved as patient records.
@@ -187,6 +205,7 @@ Before deploying a separate copy, confirm that the following values belong to th
 - The website does not automatically confirm an appointment.
 - Featured reviews are manually maintained snapshots rather than a live review feed.
 - The site currently displays only reviews that can be individually verified and attributed.
+- On static hosting such as GitHub Pages, the three-requests-per-hour limit runs in the visitor's browser rather than on a server, so it can be bypassed by clearing browser storage. The server-enforced limit applies when the site is deployed somewhere that runs the application server.
 
 ## Author
 

@@ -26,6 +26,7 @@ import consultationImage from "@/assets/dental-consultation.jpg";
 import heroImage from "@/assets/dental-hero.jpg";
 import clinicLogo from "@/assets/clinic-logo.png";
 import { Button } from "@/components/ui/button";
+import { checkAppointmentRequest } from "@/lib/appointment-check";
 
 const PHONE_DISPLAY = "+91 93451 50623";
 const PHONE_LINK = "tel:+919345150623";
@@ -206,14 +207,9 @@ function AppointmentForm() {
     setSubmitError("");
     setIsSubmitting(true);
     try {
-      const response = await fetch("/api/appointment-check", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(d),
-      });
-      const payload = await response.json() as { allowed?: boolean; error?: string };
-      if (!response.ok || !payload.allowed) {
-        setSubmitError(payload.error ?? "We could not prepare your request. Please call the clinic.");
+      const check = await checkAppointmentRequest(d);
+      if (!check.allowed) {
+        setSubmitError(check.error);
         return;
       }
       const text = [
