@@ -2,8 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { createHash } from "crypto";
 import { z } from "zod";
 
-const TIME_SLOTS = Array.from({ length: 28 }, (_, index) => {
-  const minutes = 9 * 60 + index * 30;
+const TIME_SLOTS = Array.from({ length: 14 }, (_, index) => {
+  const minutes = 9 * 60 + index * 60;
   const hour = Math.floor(minutes / 60);
   const minute = minutes % 60;
   const suffix = hour >= 12 ? "PM" : "AM";

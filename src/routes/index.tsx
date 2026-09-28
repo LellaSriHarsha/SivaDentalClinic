@@ -34,8 +34,8 @@ const PHONE_LINK = "tel:+919345150623";
 const MAP_URL = "https://maps.google.com/?cid=935043334971500449";
 const WHATSAPP_URL = "https://wa.me/919345150623";
 
-const timeSlots = Array.from({ length: 28 }, (_, index) => {
-  const minutes = 9 * 60 + index * 30;
+const timeSlots = Array.from({ length: 14 }, (_, index) => {
+  const minutes = 9 * 60 + index * 60;
   const hour = Math.floor(minutes / 60);
   const minute = minutes % 60;
   const suffix = hour >= 12 ? "PM" : "AM";
