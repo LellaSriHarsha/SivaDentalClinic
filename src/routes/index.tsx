@@ -3,6 +3,8 @@ import {
   ArrowRight,
   CalendarDays,
   Check,
+  ChevronLeft,
+  ChevronRight,
   Clock3,
   HeartHandshake,
   Menu,
@@ -27,8 +29,8 @@ import { Button } from "@/components/ui/button";
 
 const PHONE_DISPLAY = "+91 93451 50623";
 const PHONE_LINK = "tel:+919345150623";
-const MAP_URL =
-  "https://www.google.co.in/maps/place/Dr.+SIVA'S+MULTISPECIALITY+DENTAL+CLINIC/@13.0454897,80.1794364,16.05z/data=!4m6!3m5!1s0x3a5261ab3902e17d:0xcf9f0f58692a7a1!8m2!3d13.0452946!4d80.1842209";
+const MAP_URL = "https://maps.google.com/?cid=935043334971500449";
+const WHATSAPP_URL = "https://wa.me/919345150623";
 
 const timeSlots = Array.from({ length: 28 }, (_, index) => {
   const minutes = 9 * 60 + index * 30;
@@ -39,24 +41,11 @@ const timeSlots = Array.from({ length: 28 }, (_, index) => {
 });
 
 const googleReviews = [
-  {
-    author: "Karthik",
-    when: "2 months ago",
-    text: "The doctor was highly professional, patient, and explained every step clearly, which made me feel comfortable and confident. The clinic was clean, well-maintained, and the staff were friendly and supportive.",
-    url: "https://www.google.com/maps/reviews/data=!4m6!14m5!1m4!2m3!1sCi9DQUlRQUNvZENodHljRjlvT21oTldrWnVWMlpJUTNCRWNqRm1iMkZzVldkZlEyYxAB!2m1!1s0x3a5261ab3902e17d:0xcf9f0f58692a7a1",
-  },
-  {
-    author: "Kev L",
-    when: "5 months ago",
-    text: "From the onset everything was explained clearly and the process and procedures listed out step by step with utmost clarity for easy understanding. Both are brilliant young doctors.",
-    url: "https://www.google.com/maps/reviews/data=!4m6!14m5!1m4!2m3!1sCi9DQUlRQUNvZENodHljRjlvT2xWbkxXNTZORkpGZGtoRlFXc3dXWE15Ykc0dFVHYxAB!2m1!1s0x3a5261ab3902e17d:0xcf9f0f58692a7a1",
-  },
-  {
-    author: "Gokul Sankar",
-    when: "6 months ago",
-    text: "Visited Dr. Siva for wisdom tooth extraction and cleaning. He was patient and explained everything before starting. The procedure was smooth and the staff were supportive.",
-    url: "https://www.google.com/maps/reviews/data=!4m6!14m5!1m4!2m3!1sCi9DQUlRQUNvZENodHljRjlvT2s1cWJrcDRZV2d5TUdkUFIwOVZORWxhZVZsbU5HYxAB!2m1!1s0x3a5261ab3902e17d:0xcf9f0f58692a7a1",
-  },
+  { author: "Karthik", when: "2 months ago", text: "I went to this clinic for my root canal procedure. The doctor was highly professional, patient, and explained every step clearly, which made me feel comfortable and confident. The treatment was good and the crown fits perfectly with a natural look and feel. The clinic was clean and well-maintained, and the staff were friendly and supportive throughout my visits." },
+  { author: "Charu Mathi", when: "a month ago", text: "Dr. Siva explained the tooth, pain and further problems clearly, and suggested the right treatment. The surgical extraction was completed without breaking my tooth and I felt good afterwards. I am thankful to Dr. Siva and Dr. Judie for their patient care, quality treatment and attention to sterility during the procedure." },
+  { author: "Kev L", when: "5 months ago", text: "I underwent root canal treatment with cap fitting here. From the onset everything was explained clearly, with the process and procedures listed step by step for easy understanding. The root canal was completed in a single sitting and there was absolutely no pain, which was very surprising to me. Both are brilliant young doctors who are updated with the latest techniques and technology in dentistry." },
+  { author: "Rajamani Srikantan", when: "9 months ago", text: "My experience with this clinic was excellent. I had a combination of treatments handled professionally and efficiently. The techniques used were ultra-modern, including digital mapping for cap measurements. Dr. Siva is professional with a friendly attitude, explains every part of the treatment course and guides the patient clearly, which builds confidence." },
+  { author: "Gokul Sankar", when: "6 months ago", text: "Visited Dr. Siva for wisdom tooth extraction and cleaning. He was patient and explained everything before starting. The procedure was smooth and the staff were supportive. I’ll recommend him for dental care." },
 ] as const;
 
 const navItems = [
@@ -228,17 +217,17 @@ function AppointmentForm() {
         return;
       }
       const text = [
-        "🦷 *APPOINTMENT REQUEST*",
+        "*APPOINTMENT REQUEST*",
         "",
-        `👤 *Name:* ${d.name}`,
-        `📞 *Phone:* ${d.phone}`,
-        ...(d.email ? [`✉️ *Email:* ${d.email}`] : []),
-        `📅 *Preferred date:* ${d.date}`,
-        `🕐 *Preferred time:* ${d.time}`,
-        `🩺 *Reason for visit:* ${d.reason}`,
-        ...(d.message ? ["", `💬 *Message:* ${d.message}`] : []),
+        `*Name:* ${d.name}`,
+        `*Phone:* ${d.phone}`,
+        ...(d.email ? [`*Email:* ${d.email}`] : []),
+        `*Preferred date:* ${d.date}`,
+        `*Preferred time:* ${d.time}`,
+        `*Reason for visit:* ${d.reason}`,
+        ...(d.message ? ["", `*Message:* ${d.message}`] : []),
         "",
-        "✅ Please confirm whether this appointment time is available.",
+        "Please confirm whether this appointment time is available.",
         "_This is an appointment request, not a confirmed booking._",
       ].join("\n");
       setWhatsappUrl(`https://wa.me/919345150623?text=${encodeURIComponent(text)}`);
@@ -279,6 +268,49 @@ function AppointmentForm() {
   );
 }
 
+
+function ReviewsSection() {
+  const [reviewPage, setReviewPage] = useState(0);
+  const reviewsPerPage = 3;
+  const pageCount = Math.ceil(googleReviews.length / reviewsPerPage);
+  const visibleReviews = googleReviews.slice(reviewPage * reviewsPerPage, (reviewPage + 1) * reviewsPerPage);
+
+  return (
+    <section id="reviews" className="bg-accent py-20 sm:py-28">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col items-start justify-between gap-7 md:flex-row md:items-end">
+          <div><div className="flex items-center gap-1 text-secondary" aria-label="5 out of 5 stars">{Array.from({ length: 5 }).map((_, index) => <Star key={index} className="size-5 fill-current" />)}</div><h2 className="mt-3 text-3xl font-extrabold sm:text-4xl">5.0 from 77 Google reviews</h2><p className="mt-3 text-muted-foreground">Five featured reviews from the clinic’s 77 verified Google reviews.</p></div>
+          <Button asChild size="lg"><a href={MAP_URL} target="_blank" rel="noopener noreferrer">View all 77 reviews on Google<ArrowRight className="size-4" /></a></Button>
+        </div>
+        <div className="mt-10 grid gap-4 lg:grid-cols-3">
+          {visibleReviews.map((review) => (
+            <article key={review.author} className="flex min-h-80 flex-col rounded-lg border border-border bg-background p-6 shadow-sm">
+              <div className="flex items-center justify-between gap-4"><div className="flex gap-1 text-secondary" aria-label="5 stars">{Array.from({ length: 5 }).map((_, index) => <Star key={index} className="size-4 fill-current" />)}</div><span className="text-xs text-muted-foreground">{review.when}</span></div>
+              <blockquote className="mt-5 flex-1 text-sm leading-7 text-foreground/80">“{review.text}”</blockquote>
+              <div className="mt-6 flex items-center justify-between gap-3 border-t border-border pt-4"><strong>{review.author}</strong><a href={MAP_URL} target="_blank" rel="noopener noreferrer" className="text-sm font-bold text-primary hover:underline">View on Google</a></div>
+            </article>
+          ))}
+        </div>
+        <div className="mt-7 flex items-center justify-center gap-4">
+          <Button type="button" variant="outline" size="icon" onClick={() => setReviewPage((page) => (page - 1 + pageCount) % pageCount)} aria-label="Show previous reviews"><ChevronLeft className="size-5" /></Button>
+          <span className="text-sm font-semibold text-muted-foreground" aria-live="polite">Reviews {reviewPage * reviewsPerPage + 1}–{Math.min((reviewPage + 1) * reviewsPerPage, googleReviews.length)} of {googleReviews.length} featured</span>
+          <Button type="button" variant="outline" size="icon" onClick={() => setReviewPage((page) => (page + 1) % pageCount)} aria-label="Show next reviews"><ChevronRight className="size-5" /></Button>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function DesktopQuickActions() {
+  return (
+    <aside className="fixed right-4 top-1/2 z-40 hidden -translate-y-1/2 flex-col gap-3 md:flex" aria-label="Quick actions">
+      <Button asChild size="icon" className="size-14 rounded-full shadow-xl" title="Call the clinic"><a href={PHONE_LINK} aria-label="Call the clinic"><Phone className="size-5" /></a></Button>
+      <Button asChild size="icon" variant="secondary" className="size-14 rounded-full shadow-xl" title="Book an appointment"><a href="#appointment" aria-label="Book an appointment"><CalendarDays className="size-5" /></a></Button>
+      <Button asChild size="icon" className="size-14 rounded-full bg-whatsapp text-whatsapp-foreground shadow-xl hover:bg-whatsapp/90" title="Chat on WhatsApp"><a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" aria-label="Chat with the clinic on WhatsApp"><MessageCircle className="size-6" /></a></Button>
+    </aside>
+  );
+}
+
 function Index() {
   return (
     <div className="min-h-screen bg-background pb-16 text-foreground md:pb-0">
@@ -289,8 +321,9 @@ function Index() {
           <div className="absolute inset-0 bg-[linear-gradient(90deg,var(--background)_0%,color-mix(in_oklab,var(--background)_94%,transparent)_39%,color-mix(in_oklab,var(--background)_18%,transparent)_72%)]" />
           <div className="relative mx-auto flex min-h-[calc(100svh-5rem)] max-w-7xl items-center px-4 py-14 sm:px-6 lg:px-8">
             <div className="max-w-2xl animate-rise">
-              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-secondary/40 bg-background/85 px-4 py-2 text-xs font-bold text-primary shadow-sm backdrop-blur">
-                <Navigation className="size-4 text-secondary" /> Valasaravakkam, Chennai
+              <div className="mb-6 flex flex-wrap gap-2">
+                <span className="inline-flex items-center gap-2 rounded-full border border-secondary/40 bg-background/85 px-4 py-2 text-xs font-bold text-primary shadow-sm backdrop-blur"><Navigation className="size-4 text-secondary" /> Valasaravakkam, Chennai</span>
+                <span className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-xs font-bold text-primary-foreground shadow-sm"><Clock3 className="size-4 text-secondary" /> Open all 7 days, including Sundays</span>
               </div>
               <h1 className="max-w-xl text-4xl font-extrabold leading-[1.08] text-primary sm:text-6xl lg:text-7xl">Your Smile Deserves Expert Care</h1>
               <p className="mt-6 max-w-xl text-base leading-7 text-foreground/75 sm:text-lg">Comprehensive dental care focused on your comfort, confidence and long-term oral health.</p>
@@ -299,7 +332,7 @@ function Index() {
                 <Button asChild variant="secondary" size="lg"><a href={PHONE_LINK}><Phone className="size-5" />Call {PHONE_DISPLAY}</a></Button>
               </div>
               <div className="mt-10 grid max-w-2xl gap-px overflow-hidden rounded-lg border border-border bg-border shadow-lg sm:grid-cols-3">
-                {[[<Star className="size-5" />, "5.0 Google rating", "70+ listing reviews"], [<ShieldCheck className="size-5" />, "Multispeciality care", "Under one roof"], [<Clock3 className="size-5" />, "Open daily", "9 AM – 11 PM"]].map(([icon, title, text]) => (
+                {[[<Star className="size-5" />, "5.0 Google rating", "77 listing reviews"], [<ShieldCheck className="size-5" />, "Multispeciality care", "Under one roof"], [<Clock3 className="size-5" />, "Open all 7 days", "Sunday included · 9 AM – 11 PM"]].map(([icon, title, text]) => (
                   <div key={String(title)} className="flex items-center gap-3 bg-background/95 p-4 backdrop-blur"> <span className="text-secondary">{icon}</span><span><strong className="block text-sm">{title}</strong><small className="text-muted-foreground">{text}</small></span></div>
                 ))}
               </div>
@@ -345,7 +378,7 @@ function Index() {
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <SectionHeading eyebrow="Why choose us" title="Why Patients Choose Dr. SIVA'S" light />
             <div className="mt-12 grid gap-px overflow-hidden rounded-lg bg-primary-foreground/15 md:grid-cols-2 lg:grid-cols-4">
-              {[["01", "Patient-Centred Care", "Recommendations focused on individual patient needs."], ["02", "Comprehensive Services", "Multiple dental treatment options through one clinic."], ["03", "Comfort & Hygiene", "A clean, welcoming and patient-friendly environment."], ["04", "Convenient Hours", "Open every day from 9:00 AM to 11:00 PM."]].map(([number, title, text]) => <article key={number} className="bg-primary p-7 text-primary-foreground"><span className="text-sm font-bold text-secondary">{number}</span><h3 className="mt-10 text-xl font-bold">{title}</h3><p className="mt-3 text-sm leading-6 text-primary-foreground/70">{text}</p></article>)}
+              {[["01", "Patient-Centred Care", "Recommendations focused on individual patient needs."], ["02", "Comprehensive Services", "Multiple dental treatment options through one clinic."], ["03", "Comfort & Hygiene", "A clean, welcoming and patient-friendly environment."], ["04", "Open All 7 Days", "Sunday included — 9:00 AM to 11:00 PM every day."]].map(([number, title, text]) => <article key={number} className="bg-primary p-7 text-primary-foreground"><span className="text-sm font-bold text-secondary">{number}</span><h3 className="mt-10 text-xl font-bold">{title}</h3><p className="mt-3 text-sm leading-6 text-primary-foreground/70">{text}</p></article>)}
             </div>
           </div>
         </section>
@@ -360,28 +393,12 @@ function Index() {
           </div>
         </section>
 
-        <section id="reviews" className="bg-accent py-20 sm:py-28">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="flex flex-col items-start justify-between gap-7 md:flex-row md:items-end">
-              <div><div className="flex items-center gap-1 text-secondary" aria-label="5 out of 5 stars">{Array.from({ length: 5 }).map((_, index) => <Star key={index} className="size-5 fill-current" />)}</div><h2 className="mt-3 text-3xl font-extrabold sm:text-4xl">5.0 from 77 Google reviews</h2><p className="mt-3 text-muted-foreground">Recent feedback shared publicly by clinic patients on Google.</p></div>
-              <Button asChild size="lg"><a href={MAP_URL} target="_blank" rel="noreferrer">View all reviews on Google<ArrowRight className="size-4" /></a></Button>
-            </div>
-            <div className="mt-10 grid gap-4 lg:grid-cols-3">
-              {googleReviews.map((review) => (
-                <article key={review.author} className="flex min-h-64 flex-col rounded-lg border border-border bg-background p-6 shadow-sm">
-                  <div className="flex items-center justify-between gap-4"><div className="flex gap-1 text-secondary" aria-label="5 stars">{Array.from({ length: 5 }).map((_, index) => <Star key={index} className="size-4 fill-current" />)}</div><span className="text-xs text-muted-foreground">{review.when}</span></div>
-                  <blockquote className="mt-5 flex-1 text-sm leading-7 text-foreground/80">“{review.text}”</blockquote>
-                  <div className="mt-6 flex items-center justify-between gap-3 border-t border-border pt-4"><strong>{review.author}</strong><a href={review.url} target="_blank" rel="noreferrer" className="text-sm font-bold text-primary hover:underline">View on Google</a></div>
-                </article>
-              ))}
-            </div>
-          </div>
-        </section>
+        <ReviewsSection />
 
         <section id="appointment" className="py-20 sm:py-28">
           <div className="mx-auto grid max-w-7xl gap-12 px-4 sm:px-6 lg:grid-cols-[0.8fr_1.2fr] lg:px-8">
             <div><SectionHeading eyebrow="Appointments" title="Ready to Take Care of Your Smile?" body="Schedule a consultation with Dr. SIVA'S Multispeciality Dental Clinic." />
-              <div className="mt-8 space-y-5 border-t border-border pt-8"><a href={PHONE_LINK} className="flex items-center gap-4"><span className="grid size-11 place-items-center rounded-md bg-primary text-primary-foreground"><Phone className="size-5" /></span><span><small className="block text-muted-foreground">Call the clinic</small><strong>{PHONE_DISPLAY}</strong></span></a><div className="flex items-center gap-4"><span className="grid size-11 place-items-center rounded-md bg-accent text-primary"><Clock3 className="size-5" /></span><span><small className="block text-muted-foreground">Clinic hours</small><strong>Daily, 9:00 AM – 11:00 PM</strong></span></div></div>
+              <div className="mt-8 space-y-5 border-t border-border pt-8"><a href={PHONE_LINK} className="flex items-center gap-4"><span className="grid size-11 place-items-center rounded-md bg-primary text-primary-foreground"><Phone className="size-5" /></span><span><small className="block text-muted-foreground">Call the clinic</small><strong>{PHONE_DISPLAY}</strong></span></a><div className="flex items-center gap-4"><span className="grid size-11 place-items-center rounded-md bg-accent text-primary"><Clock3 className="size-5" /></span><span><small className="block text-muted-foreground">Open all 7 days, including Sunday</small><strong>9:00 AM – 11:00 PM</strong></span></div></div>
             </div>
             <AppointmentForm />
           </div>
@@ -389,7 +406,7 @@ function Index() {
 
         <section id="contact" className="bg-muted py-20 sm:py-28">
           <div className="mx-auto grid max-w-7xl gap-8 px-4 sm:px-6 lg:grid-cols-2 lg:px-8">
-            <div className="rounded-lg bg-primary p-7 text-primary-foreground sm:p-10"><p className="text-xs font-bold uppercase tracking-[0.18em] text-secondary">Visit the clinic</p><h2 className="mt-3 text-3xl font-extrabold">Dr. SIVA&apos;S Multispeciality Dental Clinic</h2><address className="mt-6 not-italic leading-7 text-primary-foreground/75">327B, Kamarajar Salai,<br />Ramakrishna Nagar, Alwartirunagar,<br />Valasaravakkam, Chennai,<br />Tamil Nadu 600087</address><p className="mt-6 font-semibold">Daily: 9:00 AM – 11:00 PM</p><div className="mt-8 flex flex-col gap-3 sm:flex-row"><Button asChild variant="inverse"><a href={PHONE_LINK}><Phone className="size-4" />Call Now</a></Button><Button asChild variant="inverse"><a href={MAP_URL} target="_blank" rel="noreferrer"><Navigation className="size-4" />Get Directions</a></Button></div></div>
+            <div className="rounded-lg bg-primary p-7 text-primary-foreground sm:p-10"><p className="text-xs font-bold uppercase tracking-[0.18em] text-secondary">Visit the clinic</p><h2 className="mt-3 text-3xl font-extrabold">Dr. SIVA&apos;S Multispeciality Dental Clinic</h2><address className="mt-6 not-italic leading-7 text-primary-foreground/75">327B, Kamarajar Salai,<br />Ramakrishna Nagar, Alwartirunagar,<br />Valasaravakkam, Chennai,<br />Tamil Nadu 600087</address><p className="mt-6 font-semibold">Open all 7 days, including Sunday<br />9:00 AM – 11:00 PM</p><div className="mt-8 flex flex-col gap-3 sm:flex-row"><Button asChild variant="inverse"><a href={PHONE_LINK}><Phone className="size-4" />Call Now</a></Button><Button asChild variant="inverse"><a href={MAP_URL} target="_blank" rel="noreferrer"><Navigation className="size-4" />Get Directions</a></Button></div></div>
             <a href={MAP_URL} target="_blank" rel="noreferrer" className="group relative min-h-96 overflow-hidden rounded-lg bg-accent"><img src={clinicImage} alt="Open the clinic location in Google Maps" loading="lazy" width={1200} height={900} className="absolute inset-0 h-full w-full object-cover opacity-35 transition-transform duration-500 group-hover:scale-105" /><div className="absolute inset-0 bg-primary/35" /><div className="relative flex h-full min-h-96 flex-col items-center justify-center p-8 text-center text-primary-foreground"><span className="grid size-16 place-items-center rounded-full bg-background text-primary shadow-xl"><Navigation className="size-7" /></span><h3 className="mt-5 text-2xl font-bold">Valasaravakkam, Chennai</h3><p className="mt-2 text-primary-foreground/80">Open location and turn-by-turn directions in Google Maps</p></div></a>
           </div>
         </section>
@@ -399,6 +416,8 @@ function Index() {
         <div className="mx-auto grid max-w-7xl gap-10 px-4 sm:px-6 md:grid-cols-[1.5fr_1fr_1fr] lg:px-8"><div><h2 className="font-display text-xl font-extrabold">Dr. SIVA&apos;S</h2><p className="mt-3 max-w-sm text-sm leading-6 text-background/65">Comprehensive dental care with a focus on comfort, confidence and healthy smiles.</p></div><div><h3 className="text-sm font-bold">Quick links</h3><div className="mt-4 grid gap-2">{navItems.slice(0, 3).concat([["Contact", "#contact"]]).map(([label, href]) => <a key={href} href={href} className="text-sm text-background/65 hover:text-background">{label}</a>)}</div></div><div><h3 className="text-sm font-bold">Contact</h3><a href={PHONE_LINK} className="mt-4 block text-sm text-background/65">{PHONE_DISPLAY}</a><p className="mt-2 text-sm text-background/65">Valasaravakkam, Chennai</p></div></div>
         <div className="mx-auto mt-12 max-w-7xl border-t border-background/15 px-4 pt-6 text-xs text-background/50 sm:px-6 lg:px-8">© {new Date().getFullYear()} Dr. SIVA&apos;S Multispeciality Dental Clinic. All rights reserved.</div>
       </footer>
+
+      <DesktopQuickActions />
 
       <div className="fixed inset-x-0 bottom-0 z-50 grid grid-cols-3 border-t border-border bg-background/95 p-2 shadow-2xl backdrop-blur md:hidden">
         <a href={PHONE_LINK} className="flex min-h-12 flex-col items-center justify-center gap-1 text-[11px] font-bold text-primary"><Phone className="size-5" />Call</a>
